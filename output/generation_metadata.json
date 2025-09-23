@@ -1,0 +1,31 @@
+{
+  "repository_url": "https://github.com/Barath-tech/AirlinemanagementSystem.git",
+  "generation_time": "2025-09-22T11:47:59.312220",
+  "stats": {
+    "total_files": 15,
+    "total_lines": 1128,
+    "languages": {
+      "properties": {
+        "files": 4,
+        "lines": 119
+      },
+      "xml": {
+        "files": 2,
+        "lines": 31
+      },
+      "java": {
+        "files": 9,
+        "lines": 978
+      }
+    }
+  },
+  "token_count": 8901,
+  "used_full_content": false,
+  "generated_files": [
+    "index",
+    "architecture",
+    "database",
+    "classes",
+    "web"
+  ]
+}
