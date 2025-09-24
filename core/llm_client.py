@@ -246,6 +246,7 @@ REQUIREMENTS:
 3. Document real component interfaces and props
 4. Create accurate class diagrams based on actual code
 5. Explain real design patterns used
+6. Identify the type of inheritance or composition
 
 FORMAT:
 # Classes and Code Structure
@@ -253,6 +254,7 @@ FORMAT:
 ## Component Overview
 [Real components/classes found in codebase with descriptions]
 
+Add all the methods and properties of the classes in the mermaid diagram below.
 ## Class Hierarchy
 ```mermaid
 classDiagram
@@ -273,9 +275,14 @@ classDiagram
     BaseClass <|-- DerivedClass
     DerivedClass --> UtilityClass : uses
 ```
+A definition of the classes and their relationships based on actual code analysis. 
+Example: is a relationship, has a relationship, what type of inheritance or composition.
 
 ## Key Components
 [Actual important classes/components with their methods and properties]
+
+## Inheritance and Composition
+[Real inheritance and composition relationships found and classify what type of inheritance or composition it is]
 
 ## Interfaces and Contracts
 [Real interfaces, props, and method signatures found in code]

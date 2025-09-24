@@ -1,92 +1,104 @@
 # Web Components and APIs
 
 ## API Endpoints
-No API endpoints were found in the provided codebase as it appears to be a Java Swing desktop application.
 
 ### Authentication
-The authentication functionality seems to be handled within the application itself. 
-- No specific API endpoints for authentication were found.
+- POST `/UserServlet` - User registration and login
+- GET `/LogoutServlet` - User logout
 
 ### Core Resources
-No API endpoints for core resources were found.
+- **Booking Endpoints**
+  - POST `/BookingServelet` - Create a new booking
+  - GET `/UserPerviousBookingServlet` - Get user's previous bookings
+- **Parcel Endpoints**
+  - GET `/OfficerServlet` - Get parcels for officer
+  - GET `/OfficerTrackingServlet` - Get parcel tracking information
+  - POST `/OfficerTrackingServlet` - Update parcel tracking information
+- **Payment Endpoints**
+  - POST `/PaymentServlet` - Create a new payment
+  - GET `/PaymentStatusServlet` - Get payment status
+- **Delivery Endpoints**
+  - GET `/DeliveryStatusServlet` - Get delivery status
+  - POST `/DeliveryStatusServlet` - Update delivery status
 
 ## Web Pages and Routes
-The application has the following main pages:
-- Home
-- Add Customer Details
-- Flight Details
-- Book Flight
-- Journey Details
-- Cancel Ticket
-- Boarding Pass
+- **Login Page**: `/UserServlet` ( handles both login and registration )
+- **Logout Page**: `/LogoutServlet`
+- **Booking Page**: `/BookingServelet`
+- **User Previous Bookings Page**: `/UserPerviousBookingServlet`
+- **Officer Parcels Page**: `/OfficerServlet`
+- **Officer Tracking Page**: `/OfficerTrackingServlet`
+- **Payment Page**: `/PaymentServlet`
+- **Payment Status Page**: `/PaymentStatusServlet`
+- **Delivery Status Page**: `/DeliveryStatusServlet`
 
 ## User Interface Flow
 ```mermaid
 graph TD
-    A[Home] --> B{User Action}
-    B -->|Add Customer Details| C[AddCustomer]
-    B -->|Flight Details| D[FlightInfo]
-    B -->|Book Flight| E[BookFlight]
-    B -->|Journey Details| F[JourneyDetails]
-    B -->|Cancel Ticket| G[Cancel]
-    B -->|Boarding Pass| H[BoardingPass]
+    A[Landing Page] --> B{User Logged In?}
+    B -->|No| C[Login Page]
+    B -->|Yes| D[Dashboard]
+    C --> E[Registration]
+    C --> D
+    D --> F[Booking Page]
+    D --> G[User Previous Bookings Page]
+    F --> H[Payment Page]
+    G --> I[Officer Parcels Page]
+    I --> J[Officer Tracking Page]
 ```
 
 ## Component Architecture
 ```mermaid
 graph TB
-    subgraph "Main Components"
-        I[Home]
-        J[AddCustomer]
-        K[FlightInfo]
-        L[BookFlight]
-        M[JourneyDetails]
-        N[Cancel]
-        O[BoardingPass]
+    subgraph "Frontend Components"
+        H[App Component]
+        I[Header/Navigation]
+        J[Main Content]
+        K[Footer]
+        L[Modal/Dialog]
     end
     
-    I --> J
-    I --> K
-    I --> L
-    I --> M
-    I --> N
-    I --> O
+    subgraph "Page Components"
+        M[Login Page]
+        N[Booking Page]
+        O[User Previous Bookings Page]
+        P[Officer Parcels Page]
+        Q[Officer Tracking Page]
+        R[Payment Page]
+        S[Payment Status Page]
+        T[Delivery Status Page]
+    end
+    
+    H --> I
+    H --> J
+    H --> K
+    J --> M
+    J --> N
+    J --> O
+    J --> P
+    J --> Q
+    J --> R
+    J --> S
+    J --> T
 ```
 
 ## Authentication Flow
-The authentication flow seems to be handled within the `Login.java` file.
+The authentication flow is handled by the `UserServlet` which accepts both GET and POST requests. 
+- **Login**: The user submits a login request with their credentials. The `UserServlet` verifies the credentials with the `UserDAO` and logs the user in if the credentials are correct.
+- **Registration**: The user submits a registration request with their details. The `UserServlet` creates a new user with the `UserDAO` and logs the user in.
 
 ## API Integration
-No API integration was found in the provided codebase.
+The frontend integrates with the backend/APIs using the following patterns:
+- **Ajax Requests**: The frontend sends Ajax requests to the backend to fetch data or perform actions.
+- **Servlet Requests**: The frontend sends requests to the backend servlets to perform actions or fetch data.
 
 ## State Management
-The state management seems to be handled within individual components.
+The state management pattern used is **Session-based**. The user's session is managed by the backend and the frontend uses the session ID to authenticate requests.
 
 ## User Experience Flow
-The user experience flow can be described as follows:
-- The user starts at the `Home` page.
-- The user can navigate to various pages such as `AddCustomer`, `FlightInfo`, `BookFlight`, `JourneyDetails`, `Cancel`, and `BoardingPass`.
-- Each page seems to have its own functionality.
-
-Note that this analysis is based on the provided codebase, which appears to be a Java Swing desktop application. Therefore, there are no web-specific API endpoints or web pages. The application seems to be a standalone desktop application with a graphical user interface. 
-
-Here is a more detailed explanation of each file:
-
-- `Home.java`: This file contains the main application window with a menu bar and various menu items.
-- `AddCustomer.java`, `BoardingPass.java`, `BookFlight.java`, `Cancel.java`, `FlightInfo.java`, `JourneyDetails.java`, `Login.java`: These files contain the respective pages or windows with their own functionality.
-
-The application seems to use a database connection class `ConnDB.java` to interact with a database. However, the database schema or API endpoints are not provided in the codebase. 
-
-In conclusion, this application is a desktop application with a graphical user interface, and it does not have web-specific API endpoints or web pages. 
-
-Here is a list of classes and their descriptions:
-
-*   `Home`: The main application window.
-*   `AddCustomer`: A page for adding customer details.
-*   `BoardingPass`: A page for generating boarding passes.
-*   `BookFlight`: A page for booking flights.
-*   `Cancel`: A page for canceling tickets.
-*   `ConnDB`: A class for connecting to the database.
-*   `FlightInfo`: A page for displaying flight information.
-*   `JourneyDetails`: A page for displaying journey details.
-*   `Login`: A page for logging in to the application.
+The user experience flow is as follows:
+- The user lands on the landing page and is prompted to login or register.
+- After logging in, the user is taken to the dashboard where they can perform actions such as booking a parcel, viewing previous bookings, etc.
+- The user can also view their previous bookings, officer parcels, and tracking information.
+- The user can perform payments and view payment status.
+- The user can also view delivery status.

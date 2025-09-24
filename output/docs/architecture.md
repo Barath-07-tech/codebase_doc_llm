@@ -1,87 +1,119 @@
 # System Architecture
 
 ## Architecture Overview
-The Airline Management System is built using a combination of Java Swing for the graphical user interface (GUI) and Java for the backend logic. The system follows a **Model-View-Controller (MVC) pattern**, although it's not strictly implemented, as the GUI components handle both the view and controller aspects. The system can be considered as a **Component-based architecture**, where each component (e.g., `AddCustomer`, `BookFlight`) represents a specific functionality.
+The system architecture of the Parcel Management System follows a Model-View-Controller (MVC) pattern. The system is divided into several layers, including the data access layer, business logic layer, and presentation layer.
 
 ## Component Architecture
-The system consists of several components, each representing a specific functionality:
+The system consists of the following components:
 
-* `Home`: The main entry point of the application, responsible for displaying the GUI and handling user interactions.
-* `AddCustomer`, `BoardingPass`, `BookFlight`, `Cancel`, `FlightInfo`, `JourneyDetails`: These components represent individual functionalities and are instantiated based on user interactions.
+* **Data Access Layer (DAO)**: This layer is responsible for interacting with the database. It includes classes such as `BookingDAO`, `ParcelDao`, `PaymentDao`, `UserDAO`, etc.
+* **Business Logic Layer (Service)**: This layer is responsible for encapsulating the business logic of the system. It includes classes such as `BookingService`, `ParcelService`, `PaymentService`, `UserService`, etc.
+* **Presentation Layer (Web)**: This layer is responsible for handling user interactions and displaying data. It includes classes such as `BookingServelet`, `DeliveryStatusServlet`, `OfficerServlet`, etc.
 
 ## System Flow
 ```mermaid
 graph TD
-    A[Home] --> B[User Interaction]
-    B -->|Instantiation| C[AddCustomer]
-    B -->|Instantiation| D[BoardingPass]
-    B -->|Instantiation| E[BookFlight]
-    B -->|Instantiation| F[Cancel]
-    B -->|Instantiation| G[FlightInfo]
-    B -->|Instantiation| H[JourneyDetails]
+    A[User] --> B[UserServlet]
+    B --> C[UserService]
+    C --> D[UserDAO]
+    D --> E[Database]
     
-    subgraph "Database"
-        I[ConnDB]
+    subgraph "Business Logic"
+        F[BookingService]
+        G[ParcelService]
+        H[PaymentService]
     end
     
-    C --> I
-    D --> I
-    E --> I
-    F --> I
-    G --> I
-    H --> I
+    subgraph "Data Access"
+        I[BookingDAO]
+        J[ParcelDao]
+        K[PaymentDao]
+    end
+    
+    subgraph "Presentation"
+        L[BookingServelet]
+        M[OfficerServlet]
+        N[PaymentServlet]
+    end
 ```
 
 ## Technology Integration
-The system integrates the following technologies:
+The system uses the following technologies:
 
-* **Java Swing**: For building the GUI components.
-* **Java**: For implementing the backend logic.
-* **SQL**: For interacting with the database through the `ConnDB` class.
+* **Java**: The system is built using Java as the primary programming language.
+* **Servlet**: The system uses Servlet technology for handling HTTP requests and responses.
+* **DAO Pattern**: The system uses the Data Access Object (DAO) pattern for interacting with the database.
+* **Service Layer**: The system uses a service layer for encapsulating business logic.
 
 ## Data Flow
 ```mermaid
 sequenceDiagram
     participant User
-    participant Home
-    participant AddCustomer
-    participant ConnDB
+    participant UserServlet
+    participant UserService
+    participant UserDAO
+    participant Database
     
-    User->>Home: Interaction
-    Home->>AddCustomer: Instantiate
-    AddCustomer->>ConnDB: Database Query
-    ConnDB-->>AddCustomer: Response
-    AddCustomer-->>Home: Update
+    User->>UserServlet: Interaction
+    UserServlet->>UserService: Request
+    UserService->>UserDAO: Query
+    UserDAO->>Database: Query
+    Database-->>UserDAO: Response
+    UserDAO-->>UserService: Data
+    UserService-->>UserServlet: Data
+    UserServlet-->>User: Update
 ```
 
 ## Security Architecture
-The system does not have a robust security architecture in place. However, it uses a basic **authentication mechanism** through the `Login` class.
+The system uses the following security measures:
+
+* **Authentication**: The system uses a simple authentication mechanism for users.
+* **Authorization**: The system uses role-based access control for authorizing users.
 
 ## Directory Structure
 ```
-AirlineManagementSystem/
-bproject/
-project.xml
-private/
-private.xml
-config.properties
-src/
-airlinemanagementsystem/
-AddCustomer.java
-BoardingPass.java
-BookFlight.java
-Cancel.java
-ConnDB.java
-FlightInfo.java
-Home.java
-JourneyDetails.java
-Login.java
+src/main/java/com/parcelmanagement
+  bean/
+    Booking.java
+    OfficerBooking.java
+    OfficerTracking.java
+    Parcel.java
+    Payment.java
+    User.java
+    UserParcel.java
+  dao/
+    BookingDAO.java
+    ParcelDao.java
+    PaymentDao.java
+    UserBookingDAO.java
+    UserDAO.java
+  service/
+    BookingService.java
+    hashing.java
+    ParcelService.java
+    PaymentService.java
+    UserBookingService.java
+    UserService.java
+  util/
+    DBUtil.java
+  web/
+    BookingServelet.java
+    DeliveryStatusServlet.java
+    downloadInvoice.java
+    LogoutServlet.java
+    OfficerServlet.java
+    OfficerTrackingServlet.java
+    PaymentServlet.java
+    PaymentStatusServlet.java
+    UserBookingServelet.java
+    UserPerviousBookingServlet.java
+    UserServlet.java
+    UserTrackingServlet.java
 ```
 
 ## Key Design Patterns
-The system employs the following design patterns:
+The system uses the following design patterns:
 
-* **MVC pattern**: Although not strictly implemented, the system follows the MVC pattern.
-* **Component-based architecture**: Each component represents a specific functionality.
-
-Note that the system can be improved by implementing a more robust security architecture, separating the concerns of the GUI components, and using a more structured approach to database interactions.
+* **MVC Pattern**: The system uses the Model-View-Controller (MVC) pattern for separating concerns.
+* **DAO Pattern**: The system uses the Data Access Object (DAO) pattern for interacting with the database.
+* **Service Layer Pattern**: The system uses a service layer for encapsulating business logic.

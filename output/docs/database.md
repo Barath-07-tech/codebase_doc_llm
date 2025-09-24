@@ -1,87 +1,93 @@
 # Database Documentation
 
 ## Database Overview
-The database technology identified from the code is MySQL, as hinted by the use of `java.sql` package and database connection properties.
+The database technology used in this project appears to be a relational database management system (RDBMS), likely MySQL, given the Java-based project structure and the presence of JDBC (Java Database Connectivity) utilities.
 
 ## Data Models
-The actual entities/models found in the code with their attributes are:
+The following entities/models were identified from the code:
 
-### Customer
-- id (primary key)
-- name
-- email
-- phone
+### User
+- **UserId** (int, PK): Unique identifier for the user
+- **CustomerName** (string): Name of the customer
+- **Email** (string): Email address of the user
 
-### Flight
-- id (primary key)
-- flight_number
-- departure
-- arrival
-- departure_time
-- arrival_time
+### Parcel
+- **ParcelId** (int, PK): Unique identifier for the parcel
+- **UserId** (int, FK): Foreign key referencing the User entity
+- **BookingDate** (date): Date the parcel was booked
 
 ### Booking
-- id (primary key)
-- customer_id (foreign key referencing Customer)
-- flight_id (foreign key referencing Flight)
-- booking_date
+- **RecName** (string): Name of the recipient
+- **RecAddress** (string): Address of the recipient
 
-### Ticket
-- id (primary key)
-- booking_id (foreign key referencing Booking)
-- ticket_number
+### OfficerBooking
+- **Parcel_Status** (string): Status of the parcel
+- **Pickup_Time** (datetime): Time of pickup
+- **Dropoff_Time** (datetime): Time of dropoff
+
+### Payment
+- **PaymentId** (int, PK): Unique identifier for the payment
+- **ParcelId** (int, FK): Foreign key referencing the Parcel entity
+
+### OfficerTracking
+- **User_id** (int): Identifier for the officer tracking
 
 ## Entity Relationships
 ```mermaid
 erDiagram
-    CUSTOMER ||--o{ BOOKING : makes
-    FLIGHT ||--o{ BOOKING : has
-    BOOKING ||--|{ TICKET : generates
+    USER ||--o{ PARCEL : books
+    PARCEL ||--|{ PAYMENT : has
+    PARCEL ||--o{ OFFICER_TRACKING : tracked_by
+    USER ||--o{ BOOKING : makes
+    PARCEL ||--o{ OFFICER_BOOKING : has_status
+    
+    USER {
+        int UserId PK
+        string CustomerName
+        string Email
+    }
+    
+    PARCEL {
+        int ParcelId PK
+        int UserId FK
+        date BookingDate
+    }
+    
     BOOKING {
-        int id PK
-        int customer_id FK
-        int flight_id FK
-        datetime booking_date
+        string RecName
+        string RecAddress
     }
     
-    CUSTOMER {
-        int id PK
-        string name
-        string email
-        string phone
+    OFFICER_BOOKING {
+        string Parcel_Status
+        datetime Pickup_Time
+        datetime Dropoff_Time
     }
     
-    FLIGHT {
-        int id PK
-        string flight_number
-        string departure
-        string arrival
-        datetime departure_time
-        datetime arrival_time
+    PAYMENT {
+        int PaymentId PK
+        int ParcelId FK
     }
     
-    TICKET {
-        int id PK
-        int booking_id FK
-        string ticket_number
+    OFFICER_TRACKING {
+        int User_id
     }
 ```
 
 ## API Integration
-The database integrates with the application through Java's `java.sql` package, specifically using `ConnDB.java` to establish connections and perform queries.
+The database integrates with the application through various service classes (e.g., `BookingService`, `ParcelService`, `PaymentService`, `UserService`) that encapsulate data access and business logic. These services interact with the database using DAO (Data Access Object) classes (e.g., `BookingDAO`, `ParcelDao`, `PaymentDao`, `UserDAO`), which perform CRUD (Create, Read, Update, Delete) operations.
 
 ## Data Access Patterns
-The real patterns found in data access code involve the use of JDBC (Java Database Connectivity) for interacting with the database, including creating connections, preparing statements, and executing queries.
+The data access patterns observed include:
+- **JDBC**: Direct use of JDBC for database connections and queries.
+- **DAO Pattern**: Use of Data Access Objects to encapsulate database interactions.
 
 ## Database Operations
-The actual CRUD (Create, Read, Update, Delete) operations found in service files include:
-
-- Creating new customer and flight records
-- Booking flights for customers
-- Generating tickets for bookings
-- Retrieving flight information and customer details
+The actual CRUD operations found in the service files include:
+- **Create**: Inserting new records (e.g., booking a parcel, making a payment).
+- **Read**: Retrieving existing records (e.g., getting parcel details, user information).
+- **Update**: Modifying existing records (e.g., updating parcel status, payment details).
+- **Delete**: Deleting records (not explicitly observed but likely present).
 
 ## Configuration
-The real database configuration from config files seems to be minimal, with database connection properties likely included in `config.properties` or similar files, though the exact content of these files is not provided.
-
-Given the provided code snippets and project structure, it appears that the database schema and interactions are designed to support basic airline management functionalities, including customer management, flight information management, booking, and ticket generation. The database technology and configuration suggest a straightforward relational database setup, likely MySQL, interacting with a Java-based application layer.
+The database configuration appears to be managed through `DBUtil.java`, which provides methods for creating and closing database connections. The actual configuration settings (e.g., database URL, username, password) are not specified in the provided code snippets but are likely found in a separate configuration file or environment variables.

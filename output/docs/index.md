@@ -1,66 +1,64 @@
-# Airline Management System - Documentation
+# Parcel Management System - Documentation
 
 ## Overview
-The Airline Management System is a Java-based desktop application designed to manage airline operations, including flight details, customer information, booking, and ticket cancellation. The system features a graphical user interface (GUI) with a menu-driven interface, allowing users to navigate through various functions.
+The Parcel Management System is a Java-based web application designed to manage parcel bookings, deliveries, and tracking. The system allows users to book parcels, track their status, and receive updates on delivery. It also provides an interface for officers to manage parcel deliveries and track parcels.
 
 ## Project Statistics
-- **Total Files**: 15
-- **Programming Languages**: Java, XML, Properties
+- **Total Files**: 61
+- **Programming Languages**: Java, JSP, Markdown, XML
 - **Last Updated**: [Current Date]
 
 ## Technology Stack
-- Java ( Swing, AWT, SQL)
-- XML
-- Properties
+- **Backend**: Java
+- **Frontend**: JSP
+- **Database**: Not explicitly mentioned, but likely MySQL or similar relational database management system
+- **Server**: Not explicitly mentioned, but likely Apache Tomcat or similar Java-based web server
 
 ## Architecture Overview
-The system follows a modular architecture, with separate classes for each functional component, such as `AddCustomer`, `BookFlight`, `FlightInfo`, and `Cancel`. The application uses a database connection class (`ConnDB`) to interact with the database.
+The system follows a Model-View-Controller (MVC) architecture pattern. The model layer consists of Java classes representing parcel, user, and payment data. The view layer consists of JSP files for rendering web pages. The controller layer consists of Java servlets that handle HTTP requests and interact with the model layer.
 
 ## Documentation Navigation
 - 📐 [Architecture](./architecture.md) - System design and components
 - 🗄️ [Database](./database.md) - Data models and relationships
 - 🏗️ [Classes](./classes.md) - Code structure and components  
-- 🌐 [Web](./web.md) - API endpoints and web interfaces (Not applicable in this case)
+- 🌐 [Web](./web.md) - API endpoints and web interfaces
 
 ## Getting Started
-1. Clone the repository: `git clone AirlineManagementSystem`
-2. Navigate to the project directory: `cd AirlineManagementSystem`
-3. Compile the Java files: `javac *.java` (assuming you're in the `src/airlinemanagementsystem` directory)
-4. Run the application: `java Home`
+1. Clone the repository: `git clone https://github.com/your-username/Parcel-Management-System.git`
+2. Build the project: `mvn clean package`
+3. Deploy the project to a Java-based web server (e.g., Apache Tomcat)
+4. Access the application: `http://localhost:8080/Parcel-Management-System`
 
 ## Key Features
-- Add Customer Details
-- Flight Details
-- Book Flight
-- Journey Details
-- Cancel Ticket
-- Boarding Pass
+- User registration and login
+- Parcel booking and tracking
+- Payment processing
+- Officer interface for managing parcel deliveries and tracking
 
 ## Project Structure
 ```
-AirlineManagementSystem/
-bproject/
-private/
-config.properties
-project.xml
-private.xml
-src/
-airlinemanagementsystem/
-AddCustomer.java
-BoardingPass.java
-BookFlight.java
-Cancel.java
-ConnDB.java
-FlightInfo.java
-Home.java
-JourneyDetails.java
-Login.java
-icons/
-front.jpg
+src/main/java/com/parcelmanagement
+  |- bean
+  |- dao
+  |- service
+  |- util
+  |- web
+src/main/resources
+  |- [static resources]
+src/main/webapp
+  |- [JSP files]
+pom.xml
 ```
 
-## External Integrations or Tools
-- Database ( likely MySQL or another relational database management system, but the specific database is not mentioned)
-- Java Swing and AWT libraries for GUI development
+The project structure consists of the following key folders:
 
-Note that some sections, such as `architecture.md`, `database.md`, `classes.md`, and `web.md`, are not created as part of this index.md file, but they can be created separately to provide more detailed information about the respective topics.
+* `src/main/java/com/parcelmanagement`: Java source code
+* `src/main/resources`: Static resources (e.g., images, CSS files)
+* `src/main/webapp`: JSP files for rendering web pages
+* `pom.xml`: Maven project file
+
+## External Integrations
+- **Database**: The system likely integrates with a relational database management system (e.g., MySQL) for storing and retrieving data.
+- **Payment Gateway**: The system likely integrates with a payment gateway (e.g., PayPal) for processing payments.
+
+Note that this documentation is based on the provided codebase analysis and may require further updates and refinements.
