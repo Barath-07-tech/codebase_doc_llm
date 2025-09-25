@@ -65,7 +65,7 @@ class DocumentationAgent:
                 print(f"Summary tokens: {self.token_estimator.estimate_tokens(llm_input):,}")
             
             # Step 4: Generate documentation
-            print("Generating documentation with Llama-4-Scout...")
+            print("Generating documentation with Gemini 2.5 pro...")
             generated_files = self.doc_generator.generate_all_docs(self.llm_client, llm_input)
             
             # Step 5: Save metadata
@@ -97,23 +97,72 @@ class DocumentationAgent:
             raise
     
     def _create_full_content(self, files: List[Dict], stats: Dict) -> str:
-        """Create complete codebase content for LLM"""
+        """Create complete codebase content for LLM with security filtering"""
+        
+        # Security sensitive patterns to filter out
+        sensitive_patterns = {
+            # Environment and configuration files
+            '.env', 'config.json', 'settings.json', 'appsettings.json',
+            # Authentication files
+            'auth', 'credentials', 'secret', 'password', 'token',
+            # Virtual environments and dependencies
+            'venv', 'env', 'node_modules', '__pycache__', 'vendor',
+            # Build and cache
+            'dist', 'build', '.next', '.nuxt', 'coverage', 'target',
+            # IDE and editor files
+            '.idea', '.vscode', '.vs',
+            # Compiled files
+            '.pyc', '.class', '.jar', '.war',
+            # Key and certificate files
+            '.pem', '.key', '.crt', '.cer', '.pfx', '.p12',
+            # Database files
+            '.db', '.sqlite', '.sqlite3',
+            # Log files
+            '.log', 'logs/',
+            # Temporary files
+            'tmp/', 'temp/', '.tmp', '.temp'
+        }
+        
+        # Filter out sensitive files
+        filtered_files = []
+        skipped_count = 0
+        
+        for file_data in files:
+            path = file_data['path'].lower()
+            
+            # Skip if file contains sensitive patterns
+            if any(pattern in path for pattern in sensitive_patterns):
+                skipped_count += 1
+                continue
+                
+            # Skip if file might contain sensitive content
+            if any(keyword in file_data['content'].lower() 
+                  for keyword in ['password', 'secret', 'token', 'key', 'credential', 'auth']):
+                skipped_count += 1
+                continue
+                
+            filtered_files.append(file_data)
+        
+        # Update stats for filtered content
+        filtered_stats = stats.copy()
+        filtered_stats['total_files'] -= skipped_count
         
         content_parts = [f"""
 CODEBASE ANALYSIS REQUEST
 
-PROJECT STATISTICS:
-- Total Files: {stats['total_files']}
+PROJECT STATISTICS (After Security Filtering):
+- Total Files: {filtered_stats['total_files']} (Excluded {skipped_count} sensitive files)
 - Total Lines: {stats['total_lines']}
 - Languages: {', '.join(stats['languages'].keys())}
 
 LANGUAGE BREAKDOWN:
 {json.dumps(stats['languages'], indent=2)}
 
-=== COMPLETE CODEBASE CONTENT ===
+=== FILTERED CODEBASE CONTENT ===
+Note: Security-sensitive files and content have been excluded
 """]
         
-        for file_data in files:
+        for file_data in filtered_files:
             content_parts.append(f"""
 FILE: {file_data['path']}
 LANGUAGE: {file_data['language']}
@@ -137,7 +186,7 @@ def main():
     # Set default values
     llm_endpoint = os.getenv("LLM_ENDPOINT")  # Default Llama endpoint
     output_dir = "output"
-    max_tokens = 7900
+    max_tokens = 1048576
     
     # Validate GitHub URL
     if not args.github_url.startswith(('https://github.com/', 'git@github.com:')):

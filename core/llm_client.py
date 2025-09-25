@@ -1,12 +1,17 @@
 import os
 from typing import Dict, Optional
+from google import genai
+from google.genai import types
+
+# Previous Llama Scout implementation
+"""
 from azure.ai.inference import ChatCompletionsClient
 from azure.core.credentials import AzureKeyCredential
 from azure.ai.inference.models import SystemMessage, UserMessage
 
 class LlamaScoutClient:
     def __init__(self, model: str = "meta/Llama-4-Scout-17B-16E-Instruct"):
-        """Initialize GitHub Marketplace Llama-4-Scout client"""
+        \"""Initialize GitHub Marketplace Llama-4-Scout client\"""
         github_token = os.environ.get("GITHUB_TOKEN")
         if not github_token:
             raise ValueError("GITHUB_TOKEN environment variable is required")
@@ -18,7 +23,7 @@ class LlamaScoutClient:
         self.model = model
     
     def call_llm(self, prompt: str, system_message: str = "You are a code documentation assistant.") -> str:
-        """Make LLM API call with error handling."""
+        \"""Make LLM API call with error handling.\"""
         try:
             response = self.client.complete(
                 messages=[
@@ -29,6 +34,36 @@ class LlamaScoutClient:
                 top_p=0.9,
             )
             return response.choices[0].message.content.strip()
+        except Exception as e:
+            return f"Error generating response: {str(e)}"
+"""
+
+class LlamaScoutClient:
+    def __init__(self, model: str = "gemini-2.5-pro"):
+        """Initialize Gemini Pro client"""
+        api_key = os.environ.get("GOOGLE_API_KEY")
+        if not api_key:
+            raise ValueError("GOOGLE_API_KEY environment variable is required")
+        
+        self.client = genai.Client(api_key=api_key)
+        self.model = model
+
+    def call_llm(self, prompt: str, system_message: str = "You are a code documentation assistant.") -> str:
+        """Make LLM API call with error handling."""
+        try:
+            full_prompt = f"{system_message}\n\n{prompt}"
+
+            response = self.client.models.generate_content(
+                model=self.model,
+                contents=full_prompt,
+                config=types.GenerateContentConfig(
+                    temperature=0.7,
+                    top_p=0.9,
+                    top_k=40,
+                ),
+            )
+
+            return response.text.strip() if response.text else "No response text returned."
         except Exception as e:
             return f"Error generating response: {str(e)}"
     
@@ -108,13 +143,15 @@ Base everything on actual code analysis, not generic templates."""
     def _get_architecture_prompt(self) -> str:
         return """Create detailed architecture.md documentation based on actual code analysis.
 Try to give more concise information and along with detailed explanations instead of single line explanation.
-Produce mermaid diagrams without syntax errors.
+Condition: Produce mermaid diagrams without syntax errors.
 REQUIREMENTS:
 1. Analyze real component relationships and dependencies
 2. Identify actual architectural patterns used (MVC, Component-based, etc.)
 3. Map real data flow between components
 4. Create accurate Mermaid diagrams showing actual file relationships
 5. Document real technology integrations found in code
+
+GO through the mermaid syntax and check for any syntax errors. If there are any syntax errors, fix them.
 
 FORMAT:
 # System Architecture
@@ -180,7 +217,7 @@ Create all diagrams based on REAL file relationships and imports found in the co
 
     def _get_database_prompt(self) -> str:
         return """Create database.md based on actual database usage patterns found in the code.
-Produce mermaid diagrams without syntax errors.
+Condition: Produce mermaid diagrams without syntax errors.
 Try to give more concise information and along with detailed explanations instead of single line explanation.
 REQUIREMENTS:
 1. Analyze actual API calls and database operations
@@ -188,6 +225,8 @@ REQUIREMENTS:
 3. Map actual relationships between entities
 4. Create accurate ERD based on real usage patterns
 5. Document actual database technology and configuration
+
+GO through the mermaid syntax and check for any syntax errors. If there are any syntax errors, fix them.
 
 FORMAT:
 # Database Documentation
@@ -238,7 +277,7 @@ Base all content on ACTUAL database usage patterns, API calls, and data structur
 
     def _get_classes_prompt(self) -> str:
         return """Create classes.md documenting the actual code structure and components.
-Produce mermaid diagrams without syntax errors.
+Condition: Produce mermaid diagrams without syntax errors.
 Try to give more concise information and along with detailed explanations instead of single line explanation.
 REQUIREMENTS:
 1. Analyze real classes, functions, and modules
@@ -247,6 +286,8 @@ REQUIREMENTS:
 4. Create accurate class diagrams based on actual code
 5. Explain real design patterns used
 6. Identify the type of inheritance or composition
+
+GO through the mermaid syntax and check for any syntax errors. If there are any syntax errors, fix them.
 
 FORMAT:
 # Classes and Code Structure
@@ -306,7 +347,7 @@ Document only REAL classes, functions, and components found in the actual codeba
 
     def _get_web_prompt(self) -> str:
         return """Create web.md documenting actual web interfaces and API endpoints.
-Produce mermaid diagrams without syntax errors.
+Condition: Produce mermaid diagrams without syntax errors.
 Try to give more concise information and along with detailed explanations instead of single line explanation.
 Don't halucinate or fabricate any information. Instead give a confident and concise information.
 REQUIREMENTS:
@@ -316,6 +357,7 @@ REQUIREMENTS:
 4. Identify actual authentication and authorization
 5. Document real API integration patterns
 
+GO through the mermaid syntax and check for any syntax errors. If there are any syntax errors, fix them.
 FORMAT:
 # Web Components and APIs
 

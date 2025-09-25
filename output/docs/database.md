@@ -1,93 +1,100 @@
 # Database Documentation
 
 ## Database Overview
-The database technology used in this project appears to be a relational database management system (RDBMS), likely MySQL, given the Java-based project structure and the presence of JDBC (Java Database Connectivity) utilities.
+The application utilizes a **MySQL** relational database. The connection is established using the `com.mysql.cj.jdbc.Driver`, as specified in the `ConnDB.java` file. The database is named `airlinemanagementsystem`, and all data related to passengers, flights, and reservations is stored within it.
 
 ## Data Models
-The following entities/models were identified from the code:
+The data models are inferred from the raw SQL queries embedded within the application's Java Swing components. The application interacts with four primary tables: `passenger`, `flight`, `reservation`, and `cancel`.
 
-### User
-- **UserId** (int, PK): Unique identifier for the user
-- **CustomerName** (string): Name of the customer
-- **Email** (string): Email address of the user
-
-### Parcel
-- **ParcelId** (int, PK): Unique identifier for the parcel
-- **UserId** (int, FK): Foreign key referencing the User entity
-- **BookingDate** (date): Date the parcel was booked
-
-### Booking
-- **RecName** (string): Name of the recipient
-- **RecAddress** (string): Address of the recipient
-
-### OfficerBooking
-- **Parcel_Status** (string): Status of the parcel
-- **Pickup_Time** (datetime): Time of pickup
-- **Dropoff_Time** (datetime): Time of dropoff
-
-### Payment
-- **PaymentId** (int, PK): Unique identifier for the payment
-- **ParcelId** (int, FK): Foreign key referencing the Parcel entity
-
-### OfficerTracking
-- **User_id** (int): Identifier for the officer tracking
+*   **passenger**: Stores personal information about customers. The `aadhar` number is used as the unique identifier to fetch passenger details when booking a flight.
+*   **flight**: Contains details about available flights, including their code, name, source, and destination.
+*   **reservation**: Acts as a transactional table linking passengers to specific flights they have booked. It stores a snapshot of passenger and flight details at the time of booking.
+*   **cancel**: Serves as a log for all cancelled tickets. When a reservation is cancelled, its record is deleted from the `reservation` table and a new entry is created here.
 
 ## Entity Relationships
+The relationships are derived from how data is linked across different operations, such as fetching a passenger to create a reservation. A passenger can have multiple reservations, and a flight can be booked in many reservations. A reservation, if cancelled, results in a single cancellation record.
+
 ```mermaid
 erDiagram
-    USER ||--o{ PARCEL : books
-    PARCEL ||--|{ PAYMENT : has
-    PARCEL ||--o{ OFFICER_TRACKING : tracked_by
-    USER ||--o{ BOOKING : makes
-    PARCEL ||--o{ OFFICER_BOOKING : has_status
-    
-    USER {
-        int UserId PK
-        string CustomerName
-        string Email
+    passenger ||--|{ reservation : "books"
+    flight ||--|{ reservation : "is booked for"
+    reservation }o--|| cancel : "is cancelled into"
+
+    passenger {
+        varchar aadhar PK "Unique Aadhar Number"
+        varchar name "Full Name"
+        varchar nationality
+        varchar phone "Contact Number"
+        varchar address
+        varchar gender
     }
-    
-    PARCEL {
-        int ParcelId PK
-        int UserId FK
-        date BookingDate
+
+    flight {
+        varchar f_code PK "Unique Flight Code"
+        varchar f_name "Flight Name (e.g., Air India)"
+        varchar source "Departure City"
+        varchar destination "Arrival City"
     }
-    
-    BOOKING {
-        string RecName
-        string RecAddress
+
+    reservation {
+        varchar PNR PK "Passenger Name Record"
+        varchar aadhar FK "Passenger Aadhar"
+        varchar flightcode FK "Flight Code"
+        varchar TIC "Ticket Number"
+        varchar name "Passenger Name (denormalized)"
+        varchar nationality "Nationality (denormalized)"
+        varchar flightname "Flight Name (denormalized)"
+        varchar src "Source (denormalized)"
+        varchar des "Destination (denormalized)"
+        varchar ddate "Date of Travel"
     }
-    
-    OFFICER_BOOKING {
-        string Parcel_Status
-        datetime Pickup_Time
-        datetime Dropoff_Time
-    }
-    
-    PAYMENT {
-        int PaymentId PK
-        int ParcelId FK
-    }
-    
-    OFFICER_TRACKING {
-        int User_id
+
+    cancel {
+        varchar cancelno PK "Unique Cancellation Number"
+        varchar pnr "Original PNR of cancelled ticket"
+        varchar name "Passenger Name (denormalized)"
+        varchar fcode "Flight Code (denormalized)"
+        varchar date "Date of Cancellation"
     }
 ```
 
 ## API Integration
-The database integrates with the application through various service classes (e.g., `BookingService`, `ParcelService`, `PaymentService`, `UserService`) that encapsulate data access and business logic. These services interact with the database using DAO (Data Access Object) classes (e.g., `BookingDAO`, `ParcelDao`, `PaymentDao`, `UserDAO`), which perform CRUD (Create, Read, Update, Delete) operations.
+The application is a Java Swing desktop GUI, not a web service with APIs. The database is tightly coupled with the user interface components. Database operations are triggered directly by user actions (e.g., button clicks) within the `actionPerformed` methods of each Swing frame (`JFrame`).
+
+*   **`AddCustomer.java`**: Interacts with the `passenger` table to create new customer records.
+*   **`BookFlight.java`**: Fetches data from `passenger` and `flight`, then inserts a new record into the `reservation` table.
+*   **`Cancel.java`**: Reads from the `reservation` table, inserts a record into the `cancel` table, and finally deletes the original record from `reservation`.
+*   **`BoardingPass.java` & `JourneyDetails.java`**: Perform read operations on the `reservation` table to display booking information to the user.
+*   **`FlightInfo.java`**: Reads and displays all records from the `flight` table.
 
 ## Data Access Patterns
-The data access patterns observed include:
-- **JDBC**: Direct use of JDBC for database connections and queries.
-- **DAO Pattern**: Use of Data Access Objects to encapsulate database interactions.
+The application employs a direct, low-level data access strategy using standard Java Database Connectivity (JDBC).
+
+*   **Connection Management**: A new database connection is established via the `ConnDB` class for nearly every database operation. This is inefficient for high-load systems but simple for this application's scope.
+*   **Query Method**: Raw SQL queries are used exclusively. There is no Object-Relational Mapping (ORM) framework like Hibernate or JPA, nor a query builder library.
+*   **Query Construction**: SQL queries are built by concatenating strings with user input (e.g., `"... where PNR = '"+pnr+"'"`). This pattern is highly susceptible to SQL Injection vulnerabilities and is not recommended for production applications.
+*   **Result Set Processing**: Data is read from `java.sql.ResultSet` objects. In some UI components (`FlightInfo`, `JourneyDetails`), the `net.proteanit.sql.DbUtils` library is used to simplify the process of populating a `JTable` directly from a `ResultSet`.
 
 ## Database Operations
-The actual CRUD operations found in the service files include:
-- **Create**: Inserting new records (e.g., booking a parcel, making a payment).
-- **Read**: Retrieving existing records (e.g., getting parcel details, user information).
-- **Update**: Modifying existing records (e.g., updating parcel status, payment details).
-- **Delete**: Deleting records (not explicitly observed but likely present).
+The application performs a range of Create, Read, and Delete operations. No Update operations were observed in the codebase.
+
+*   **CREATE**:
+    *   `INSERT into passenger ...`: A new passenger is added (`AddCustomer.java`).
+    *   `INSERT into reservation ...`: A new flight booking is created (`BookFlight.java`).
+    *   `INSERT into cancel ...`: A cancellation record is logged (`Cancel.java`).
+
+*   **READ**:
+    *   `SELECT * from passenger where aadhar = ...`: To fetch user details for a new booking (`BookFlight.java`).
+    *   `SELECT * from flight`: To display all available flights (`FlightInfo.java`) and populate dropdowns (`BookFlight.java`).
+    *   `SELECT * from reservation where PNR = ...`: To show journey details or generate a boarding pass (`JourneyDetails.java`, `BoardingPass.java`, `Cancel.java`).
+
+*   **DELETE**:
+    *   `DELETE from reservation where PNR = ...`: A reservation is removed from the active bookings table upon successful cancellation (`Cancel.java`).
 
 ## Configuration
-The database configuration appears to be managed through `DBUtil.java`, which provides methods for creating and closing database connections. The actual configuration settings (e.g., database URL, username, password) are not specified in the provided code snippets but are likely found in a separate configuration file or environment variables.
+All database configuration details are hardcoded within the constructor of the `ConnDB.java` class. The configuration is not stored in an external properties file.
+
+*   **JDBC Driver**: `com.mysql.cj.jdbc.Driver`
+*   **JDBC URL**: `jdbc:mysql:///airlinemanagementsystem`
+*   **Username**: `root`
+*   **Password**: `root`

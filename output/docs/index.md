@@ -1,21 +1,32 @@
-# Parcel Management System - Documentation
+# Airline Management System - Documentation
 
 ## Overview
-The Parcel Management System is a Java-based web application designed to manage parcel bookings, deliveries, and tracking. The system allows users to book parcels, track their status, and receive updates on delivery. It also provides an interface for officers to manage parcel deliveries and track parcels.
+This project is a desktop-based Airline Management System developed in Java. Analysis of the source code reveals a comprehensive application designed to handle core airline operations through a graphical user interface (GUI). The system facilitates passenger management, flight booking, ticket cancellation, and information retrieval. It directly interacts with a MySQL database to persist and manage all data, making it a classic example of a database-driven desktop application built using the Java Swing framework.
 
 ## Project Statistics
-- **Total Files**: 61
-- **Programming Languages**: Java, JSP, Markdown, XML
-- **Last Updated**: [Current Date]
+- **Total Files**: 13
+- **Programming Languages**: Java, XML, properties
+- **Last Updated**: 2024-05-23
 
 ## Technology Stack
-- **Backend**: Java
-- **Frontend**: JSP
-- **Database**: Not explicitly mentioned, but likely MySQL or similar relational database management system
-- **Server**: Not explicitly mentioned, but likely Apache Tomcat or similar Java-based web server
+- **Programming Language**:
+    - **Java**: The core language used for the application's logic and structure.
+- **User Interface**:
+    - **Java Swing**: The primary framework used to build the graphical user interface (GUI) components, windows, and event handling.
+- **Database**:
+    - **MySQL**: The backend relational database used for storing all application data, including passenger details, flight information, and reservations. The connection string `jdbc:mysql:///airlinemanagementsystem` confirms its use.
+    - **JDBC (Java Database Connectivity)**: The standard Java API used to connect and execute queries against the MySQL database. The `com.mysql.cj.jdbc.Driver` is explicitly loaded.
+- **Development Environment**:
+    - **Apache NetBeans**: The project is structured as a NetBeans project, indicated by the `nbproject` directory and associated XML configuration files.
+- **Third-Party Libraries**:
+    - **JCalendar (jcalendar-1.4.jar)**: Provides the `JDateChooser` component, a Swing widget used for easy date selection in the flight booking interface.
+    - **RS2XML (rs2xml.jar)**: Contains the `net.proteanit.sql.DbUtils` utility, which is used to efficiently populate `JTable` components directly from a JDBC `ResultSet` in modules like `FlightInfo` and `JourneyDetails`.
 
 ## Architecture Overview
-The system follows a Model-View-Controller (MVC) architecture pattern. The model layer consists of Java classes representing parcel, user, and payment data. The view layer consists of JSP files for rendering web pages. The controller layer consists of Java servlets that handle HTTP requests and interact with the model layer.
+The application follows a monolithic architecture typical for desktop applications. It can be logically separated into three layers:
+1.  **Presentation Layer**: Comprises all the Java Swing classes (`Home`, `AddCustomer`, `BookFlight`, etc.) that create the user interface. Each class represents a specific window or screen.
+2.  **Business Logic Layer**: The logic is tightly coupled with the presentation layer within the `actionPerformed` event listeners. These methods handle user input, validate data, and orchestrate calls to the data access layer.
+3.  **Data Access Layer**: A centralized `ConnDB.java` class manages the JDBC connection to the MySQL database. SQL queries are embedded directly within the methods of the presentation layer classes to perform CRUD (Create, Read, Update, Delete) operations.
 
 ## Documentation Navigation
 - 📐 [Architecture](./architecture.md) - System design and components
@@ -24,41 +35,57 @@ The system follows a Model-View-Controller (MVC) architecture pattern. The model
 - 🌐 [Web](./web.md) - API endpoints and web interfaces
 
 ## Getting Started
-1. Clone the repository: `git clone https://github.com/your-username/Parcel-Management-System.git`
-2. Build the project: `mvn clean package`
-3. Deploy the project to a Java-based web server (e.g., Apache Tomcat)
-4. Access the application: `http://localhost:8080/Parcel-Management-System`
+
+### Prerequisites
+1.  **Java Development Kit (JDK)**: Version 8 or higher.
+2.  **MySQL Server**: A running instance of MySQL database.
+3.  **Apache NetBeans IDE**: Recommended for opening and running the project seamlessly.
+4.  **Required Libraries**: `jcalendar-1.4.jar` and `rs2xml.jar`.
+
+### Database Setup
+1.  Start your MySQL server.
+2.  Create a new database named `airlinemanagementsystem`.
+   ```sql
+   CREATE DATABASE airlinemanagementsystem;
+   ```
+3.  Connect to the database and create the necessary tables. The schemas can be inferred from the SQL queries in the Java files (e.g., `passenger`, `flight`, `reservation`, `cancel`).
+4.  Ensure the database credentials in `src/airlinemanagementsystem/ConnDB.java` match your MySQL setup (default is user: `root`, password: `root`).
+   ```java
+   // From ConnDB.java
+   c = DriverManager.getConnection("jdbc:mysql:///airlinemanagementsystem", "root", "root");
+   ```
+
+### Running the Application
+1.  Clone or download the project source code.
+2.  Open the project in Apache NetBeans IDE (`File -> Open Project`).
+3.  Add the `jcalendar-1.4.jar` and `rs2xml.jar` files to the project's libraries/classpath.
+4.  Locate the `Home.java` file, which is the main entry point of the application.
+5.  Right-click on `Home.java` and select "Run File" to launch the application.
 
 ## Key Features
-- User registration and login
-- Parcel booking and tracking
-- Payment processing
-- Officer interface for managing parcel deliveries and tracking
+- **Customer Management**: Provides a dedicated interface (`AddCustomer.java`) to add new passengers to the system with details like name, aadhar number, address, and gender.
+- **Flight Booking**: Allows users to book flights (`BookFlight.java`) by first fetching passenger details via Aadhar number, selecting a source and destination, and then creating a reservation with a unique PNR.
+- **Ticket Cancellation**: Users can cancel an existing reservation (`Cancel.java`) by providing the PNR number. The system logs the cancellation and removes the booking.
+- **Flight Information**: A screen (`FlightInfo.java`) displays a table of all available flights, showing details fetched directly from the database.
+- **Journey Details Lookup**: Users can retrieve and view the complete details of a specific booking (`JourneyDetails.java`) using its PNR number.
+- **Boarding Pass Generation**: A simple boarding pass (`BoardingPass.java`) can be generated and displayed on-screen by entering a valid PNR number.
 
 ## Project Structure
 ```
-src/main/java/com/parcelmanagement
-  |- bean
-  |- dao
-  |- service
-  |- util
-  |- web
-src/main/resources
-  |- [static resources]
-src/main/webapp
-  |- [JSP files]
-pom.xml
+AirlineManagementSystem/
+├── nbproject/           # NetBeans IDE project configuration files
+│   ├── private/         # User-specific project metadata
+│   └── project.xml      # Main project definition for NetBeans
+├── src/
+│   └── airlinemanagementsystem/ # Main package for all source code
+│       ├── icons/             # Directory for UI icons and images
+│       ├── AddCustomer.java   # GUI for adding a new passenger
+│       ├── BoardingPass.java  # GUI for displaying a boarding pass
+│       ├── BookFlight.java    # GUI for booking a flight ticket
+│       ├── Cancel.java        # GUI for cancelling a reservation
+│       ├── ConnDB.java        # Central class for database connection
+│       ├── FlightInfo.java    # GUI to display all flight information
+│       ├── Home.java          # Main application window with menu navigation
+│       └── JourneyDetails.java# GUI to show details of a specific journey
+└── build.xml            # Ant build script (auto-generated by NetBeans)
 ```
-
-The project structure consists of the following key folders:
-
-* `src/main/java/com/parcelmanagement`: Java source code
-* `src/main/resources`: Static resources (e.g., images, CSS files)
-* `src/main/webapp`: JSP files for rendering web pages
-* `pom.xml`: Maven project file
-
-## External Integrations
-- **Database**: The system likely integrates with a relational database management system (e.g., MySQL) for storing and retrieving data.
-- **Payment Gateway**: The system likely integrates with a payment gateway (e.g., PayPal) for processing payments.
-
-Note that this documentation is based on the provided codebase analysis and may require further updates and refinements.
